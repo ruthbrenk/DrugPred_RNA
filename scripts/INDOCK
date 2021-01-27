@@ -1,0 +1,107 @@
+DOCK 3.5 parameter
+################################################################################
+################## DOCK 3.5 INPUT PARAMETER FILE ###############################
+################################################################################
+#
+################################################################################
+#                             INPUT
+#
+mode                          search
+receptor_sphere_file          ../sph/match.sph
+cluster_numbers               1
+ligand_type                   coordinates
+# NOTE: split_database_index is reserved to specify a list of files
+ligand_atom_file              drug_moles.db
+#
+################################################################################
+#                             OUTPUT
+#
+output_file_prefix            res.
+output_hydrogens              yes
+recombine_fragments           yes
+#
+################################################################################
+#                             MATCHING
+#
+distance_tolerance            1.2
+nodes_maximum                 4
+nodes_minimum                 4
+ligand_binsize                0.5
+ligand_overlap                0.4
+receptor_binsize              0.5
+receptor_overlap              0.4
+bump_maximum                  1
+focus_cycles                  0
+focus_bump                    0
+focus_type                    energy
+critical_clusters             no
+#
+################################################################################
+#                             COLORING
+#                             ligand color, receptor color
+#
+chemical_matching             no
+case_sensitive                no
+match                         positive negative
+match                         negative positive
+match                         donor acceptor
+match                         acceptor donor
+match                         neutral neutral
+match                         ester_o donor 
+match                         amide_o donor 
+################################################################################
+#                             SINGLE MODE
+#
+#rmsd_override                 0.5
+#contact_minimum               200.0
+#energy_maximum               -100.0
+#truncate_output              1000.0
+#
+################################################################################
+#                             SEARCH MODE
+#
+ratio_minimum                 0.0
+atom_minimum                  6
+atom_maximum                  80
+restart                       no
+number_save                   5000
+normalize_save                0
+molecules_maximum             300000
+restart_interval              1000
+initial_skip                  0
+timeout                       180
+#
+################################################################################
+#                             SCORING
+#
+scoring_option                solvation
+ligand_desolvation            none
+distmap_file                  ../grids/distmap
+delphi_file                   ../grids/rec+sph.phi
+chemgrid_file_prefix          ../grids/chem
+#solvmap_file                  ../grids/solvmap
+interpolate                   yes
+vdw_parameter_file            ../grids/vdw.parms.amb.mindock
+vdw_maximum                   1.0e10
+electrostatic_scale           1.0
+vdw_scale                     1.0
+#
+################################################################################
+#                             MINIMIZATION
+#
+minimize                      yes
+minimization_max             1.0e15
+check_degeneracy              no
+#degeneracy_wobble             0
+#degenerate_save_interval      25
+#check_degenerate_children     no
+simplex_iterations            20
+simplex_convergence           0.1
+simplex_restart               1.0
+simplex_initial_translation   1.0
+simplex_initial_rotation      0.1
+#
+#
+################################################################################
+################################################################################
+################################################################################

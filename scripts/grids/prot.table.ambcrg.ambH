@@ -1,0 +1,14 @@
+!CORRESPONDENCE OF PDB TYPES WITH CHARGES & NUMERICAL TYPE INDICATORS
+!
+! --AMBER united-atom charges, based on Weiner et al.,
+! JACS 106, 765 (1984)
+! --names as per AMBER convention
+!
+! --termini not from the reference above; 0.416=(0.248 + 1.0)/3 
+! --0.248 is the amide H charge in the residues above
+! --simplistic way of making the N-terminus have a net charge of +1
+! and the C-terminus have a net charge of -1
+!
+!aaaxxxrrrnnnncqqqqqqqqxtt   format (A4, 3x, A3, A4, A1, F8.3, 1x, I2) 
+!
+ CX    AAA        0.00   1         Agata

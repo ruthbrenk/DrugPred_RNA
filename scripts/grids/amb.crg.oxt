@@ -1,0 +1,4 @@
+! amber charges, based on kollman, weiner et al
+! j. comp chem, vol 7, p 230 (1986)
+atom__resnumbc_charge_
+CX		 0.000

@@ -1,0 +1,248 @@
+#MakeDOCK Makefile
+#------------------
+
+SHELL = /bin/sh
+
+#DOCK_BASE_3_6 is a global environment variable
+EXE       = $(DOCK_BASE_3_6)/bin/Linux
+CANONICAL = $(DOCK_BASE_3_6)/scripts
+ETC       = $(DOCK_BASE_3_6)/etc
+PRIV      = $(DOCK_BASE_3_6)/private
+DrugPred_FILES = $(DrugPred)
+
+
+DMS     = $(PRIV)/dms
+
+SPHGEN   = $(EXE)/sphgen
+DISTMAP	 = $(EXE)/distmap
+SOLVMAP  = $(EXE)/newsolv.ms
+SOLVSEV  = $(EXE)/newsolv.sev
+CHEMGRID = $(EXE)/chemgrid
+CONVSYB	 = $(EXE)/convsyb
+SCOREOPT = $(EXE)/scoreopt_so
+PDBTOSPH = $(EXE)/pdbtosph
+FILTEXE  = $(EXE)/filt.exe
+
+MAKEBOX	     = $(CANONICAL)/makebox.pl
+SHOWBOX	     = $(ETC)/showbox
+MAKESPHERES1 = $(CANONICAL)/makespheres1.pl
+MAKESPHERES3 = $(CANONICAL)/makespheres3.pl
+COLORSPH     = $(CANONICAL)/colorspheres.pl
+MKCRGFMT     = $(CANONICAL)/mkcrgfmt
+ADDH	     = $(CANONICAL)/add_h.spl
+
+MOLCHARGE    = $(ETC)/molcharge3
+
+CHEM_GRIDS  = grids/chem.bmp grids/chem.esp grids/chem.vdw
+SPH_INPUTS  = sph/INSPH
+GRID_INPUTS = grids/INDIST grids/delphi.com grids/vdw.siz  \
+		grids/genric.prm grids/INCHEM  \
+		grids/INSOLV grids/INSEV
+
+DrugPred_INPUTS = grids/amb.crg.oxt grids/prot.table.ambcrg.ambH
+
+BOX	     = grids/box
+
+#auto: start dosph dogrids finish
+
+auto: start dogrids finish
+
+
+dosph: sph/match1.sph sph/match2.sph sph/match3.sph
+
+dogrids: grids/distmap grids/rec+sph.phi chemgrids 
+
+chemgrids: $(CHEM_GRIDS)
+
+start:
+	@echo "MakeDOCK 2.0, modified by J.Irwin and M.Mysinger."
+	@echo "Previous versions by D.M.Lorber, B.Q.Wei, A.N.Kirschner, and N.Huang"
+	@echo "Using scripts in $(DOCK_BASE_3_6)."
+
+#filt.params:
+	#@cp $(CANONICAL)/filt.params .
+
+#xtal-lig.pdb:
+	#@echo "No xtal-lig.pdb, trying xtal-lig.mol2!"
+	#@$(ETC)/makepdb.csh xtal-lig.mol2
+
+#rec.site: rec.pdb xtal-lig.pdb filt.params
+	#@echo "Creating binding-site residue list"
+	#@rm -rf rec.site
+	#@$(FILTEXE) < filt.params > filt.log
+
+#rec.ms:	rec.pdb rec.site
+	#@echo "Creating molecular surface"
+	#@rm -rf dms.log rec.ms
+	#@time nice $(DMS) rec.pdb -a -i rec.site -g dms.log -p -n -o rec.ms
+
+sph/:
+	@mkdir -p sph
+
+$(SPH_INPUTS): | sph/
+	@cp $(CANONICAL)/$@ sph/
+
+#sph/sph: rec.ms sph/INSPH | sph/
+	#@echo "Creating sphgen spheres"
+	#@rm -rf sph/OUTSPH sph/sph*
+	#@cd sph; $(SPHGEN)
+	#@mv sph/sph sph/sph.tmp
+	#@grep -v "DOCK 3.5 receptor_spheres" sph/sph.tmp > sph/sph
+	#@$(ETC)/doshowsph.csh sph/sph 0 sph/sph.pdb
+	#@rm -rf sph/sph.tmp
+
+sph/match.sph: xtal-lig.pdb | sph/
+	@echo "Converting ligand atoms to spheres"
+	@rm -rf sph/match.sph*
+	@$(PDBTOSPH) xtal-lig.pdb sph/match.sph
+	@$(ETC)/doshowsph.csh sph/match.sph 1 sph/match.sph.pdb
+
+grids/:
+	@mkdir -p grids
+
+$(GRID_INPUTS) grids/vdw.parms.amb.mindock: | grids/
+	@cp $(CANONICAL)/$@ grids/
+
+$(DrugPred_INPUTS) : | grids/
+	@cp $(DrugPred_FILES)/$@ grids/
+
+#grids/rec.crg: rec.pdb | grids/
+	#@echo "Adding essential hydrogens to receptor"
+	#@rm -rf grids/rec.crg
+	#@xmlclient.py protonate_united rec.pdb
+	#@mv -f rec.crg grids/rec.crg
+
+grids/rec.crg:	
+	@echo Converting AMBER format to charge format
+	@$(MKCRGFMT) rec.amb > grids/rec.crg
+	#cp rec.amb grids/rec.crg
+
+#sph/match1.sph: sph/sph sph/match.sph grids/rec.crg | sph/
+#sph/match1.sph: sph/match.sph grids/rec.crg | sph/
+	#@echo "Generating matching spheres for delphi"
+	#@rm -rf sph/match1.sph* sph/makesph1.log
+	#@$(MAKESPHERES1) > sph/makesph1.log
+	#@$(ETC)/doshowsph.csh sph/match1.sph 1 sph/match1.sph.pdb
+
+sph/match0.sph: | sph/
+	@if test -e xtal-lig-frag.pdb; then \
+		echo "on" > .usefragsph; \
+		echo "Converting ligand fragment atoms to spheres"; \
+		rm -rf sph/match0.sph*; \
+		$(PDBTOSPH) xtal-lig-frag.pdb sph/match0.sph; \
+		$(ETC)/doshowsph.csh sph/match0.sph 1 sph/match0.sph.pdb; \
+	else \
+		echo "off" > .usefragsph; \
+		touch sph/match0.sph; \
+	fi
+
+.useligsph:
+	@echo "on" > .useligsph
+
+#sph/match2.sph: sph/sph sph/match.sph sph/match0.sph grids/rec.crg \
+		.useligsph | sph/
+	#@echo "Generating faster matching2 spheres for docking"
+	#@rm -rf sph/match2.sph* sph/makesph2.log sph/colorsph2.log
+	#@$(MAKESPHERES3) 1.5 0.8 45 sph/match2.sph > sph/makesph2.log
+	#@$(ETC)/doshowsph.csh sph/match2.sph 1 sph/match2.sph.pdb
+	#@echo "Coloring matching spheres"
+	#@$(COLORSPH) sph/match2.sph > sph/colorsph2.log
+
+#sph/match3.sph: sph/sph sph/match.sph sph/match0.sph grids/rec.crg \
+		.useligsph | sph/
+	#@echo "Generating slower matching3 spheres for docking"
+	#@rm -rf sph/match3.sph* sph/makesph3.log sph/colorsph3.log
+	#@$(MAKESPHERES3) 1.0 0.5 60 sph/match3.sph > sph/makesph3.log
+	#@$(ETC)/doshowsph.csh sph/match3.sph 1 sph/match3.sph.pdb
+	#@echo "Coloring matching spheres"
+	#@$(COLORSPH) sph/match3.sph > sph/colorsph3.log
+
+#grids/box: rec.pdb sph/match2.sph | grids/
+	#@echo "Creating box around spheres"
+	#@rm -rf grids/box grids/makebox.log
+	#@$(MAKEBOX) $(PWD) > grids/makebox.log
+
+grids/box: rec.pdb sph/match.sph | grids/
+	@echo "Creating box around spheres . . ."
+	@rm -rf $(BOX)
+	@cp $(CANONICAL)/grids/box.params grids
+	@cd grids; $(SHOWBOX) < box.params > /dev/null
+
+grids/distmap: grids/INDIST grids/rec.crg grids/box | grids/
+	@echo "Creating distmap shape-complementarity grid"
+	@rm -rf grids/distmap grids/distmap.log grids/OUTDIST grids/distmap.box
+	@echo `date` > grids/distmap.log
+	@cat grids/INDIST >> grids/distmap.log
+	@cd grids; time nice $(DISTMAP)
+
+#grids/rec+sph.crg: sph/match1.sph grids/rec.crg | grids/
+grids/rec+sph.crg: sph/match.sph grids/rec.crg | grids/
+	@echo "Adding spheres to electrostatic grid"
+	@rm -rf grids/rec+sph.crg
+	#@cat grids/rec.crg sph/match1.sph.pdb > grids/rec+sph.crg
+	@cat grids/rec.crg sph/match.sph.pdb > grids/rec+sph.crg
+
+grids/rec+sph.phi: grids/rec+sph.crg grids/delphi.com grids/vdw.siz \
+			grids/amb.crg.oxt grids/genric.prm | grids/
+	@echo "Creating DelPhi electrostatic grid"
+	@rm -rf grids/rec+sph.phi grids/delphi.log delphi.pdb
+	@echo `date` > grids/delphi.log
+	@cat grids/delphi.com >> grids/delphi.log
+	@cd grids; time nice ./delphi.com >> delphi.log
+	@mv -f grids/fort.19 grids/delphi.pdb
+
+$(CHEM_GRIDS): grids/rec.crg grids/box grids/INCHEM \
+		grids/prot.table.ambcrg.ambH grids/vdw.parms.amb.mindock | grids/
+	@echo "Creating chemgrid maps"
+	@rm -rf grids/chem.* grids/OUTPARM grids/PDBPARM grids/OUTCHEM
+	@echo `date` > grids/chem.log
+	@cat grids/INCHEM >> grids/chem.log
+	@cd grids; time nice $(CHEMGRID) >> chem.log 
+
+grids/solvmap: grids/rec.crg grids/box grids/INSOLV | grids/
+	@echo "Creating solvmap occluded volume desolvation grid"
+	@rm -rf grids/OUTSOLV
+	@cd grids; time nice $(SOLVMAP)
+	@echo `date` >> grids/OUTSOLV
+	@cat grids/INSOLV >> grids/OUTSOLV
+
+# Extra optional make targets
+grids/solvmap_sev: grids/rec.crg grids/box grids/INSEV | grids/
+	@echo "Atomic solvent excluded volume calculations underway"
+	@rm -rf grids/OUTSEV
+	@cd grids; time nice $(SOLVSEV)
+	@echo `date` >> grids/OUTSEV
+	@cat grids/INSEV >> grids/OUTSEV
+
+finish: grids/OUTPARM grids/delphi.log | grids/
+	@echo "Checking for WARNINGS in OUTPARM."
+	@grep -A 2 WARNING grids/OUTPARM; test 1
+	@echo "Checking for WARNINGS in delphi.log."
+	@grep WARNING grids/delphi.log; test 1
+	@echo "End of MakeDOCK sphere and grid generation."
+	@mkdir testing
+
+clean: clean_inputs clean_logs
+
+distclean: clean_inputs clean_logs clean_outputs
+	@if test -e sph; then rmdir sph; fi
+	@if test -e grids; then rmdir grids; fi
+
+clean_inputs:
+	@rm -rf filt.params $(SPH_INPUTS) $(GRID_INPUTS)
+
+clean_outputs:
+	@rm -rf rec.site rec.ms sph/sph* sph/match.sph* \
+		grids/rec.crg sph/match1.sph* sph/match0.sph* sph/match2.sph* \
+		sph/match3.sph* grids/box grids/distmap grids/rec+sph.crg \
+		grids/rec+sph.phi $(CHEM_GRIDS) grids/solvmap \
+		grids/vdw.parms.amb.mindock \
+		.usefragsph .useligsph
+
+clean_logs:
+	@rm -rf filt.log dms.log sybyl.log sph/OUTSPH \
+		sph/makesph1.log sph/makesph2.log sph/makesph3.log \
+		sph/colorsph2.log sph/colorsph3.log grids/makebox.log \
+		grids/distmap.log grids/OUTDIST grids/distmap.box  \
+		grids/delphi.log grids/delphi.pdb grids/chem.log \
+		grids/OUTPARM grids/PDBPARM grids/OUTCHEM grids/OUTSOLV
