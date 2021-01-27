@@ -18,6 +18,11 @@ The following packages are also necessary in R (but should be autoinstalled the 
 - xgboost
 - fastshap
 
+
+#### Download the files ########################################################
+
+Download all files from the DrugPred_RNA repository on GitHub and maintain the folder structure
+
 #### Preparing the conda environment to run DrugPred_RNA ########################################################
 
 It's possible to create a conda environment with the necessary packages from the .yml-file. To do this, run
@@ -27,6 +32,10 @@ conda env create --file DrugPred_RNA_env.yml
 You should now be able to run
 
 conda activate drugpred_RNA
+
+#### Unzip the database containg drug molecules for docking  ########################################################
+
+unzip the file mols.zip and move the file drug_moles.db to the scripts folder
 
 
 #### Downloading and preparing files for DrugPred_RNA ###########################################################
