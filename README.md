@@ -43,6 +43,9 @@ conda activate drugpred_RNA
 
 4)  create the environment variable DrugPred and point it to the foler containing the DrugPred scripts
 
+5) at the following folders to your path: $DOCK_BASE/bin/, $DOCK_BASE/private, $DOCK_BASE/etc, $DOCK_BASE/scripts, $DOCK_BASE/bin/Linux, $path)
+(e. g. set path = ($DOCK_BASE/bin/ $DOCK_BASE/private $DOCK_BASE/etc $DOCK_BASE/scripts $DOCK_BASE/bin/Linux $path))
+
 
 #### Downloading and preparing files for DrugPred_RNA ###########################################################
 
