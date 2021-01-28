@@ -37,7 +37,7 @@ conda activate drugpred_RNA
 
 1) unzip the file mols.zip and move the file drug_moles.db to the scripts folder
 
-2) create the environment variable DOCK_BASE_3_6 and point it to the folder containing DOCK 3.6 (e. g. setenv DOCK_BASE_3_6 /path_to_dock_folder)
+2) create the environment variable DOCK_BASE_3_6 and point it to the folder containing DOCK 3.6 (e. g. setenv DOCK_BASE_3_6 /path_to_dock_folder/dockenv)
 
 
 #### Downloading and preparing files for DrugPred_RNA ###########################################################
