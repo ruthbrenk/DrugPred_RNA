@@ -215,7 +215,7 @@ os.system(command)
 
 print('docking started')
 
-command = os.environ['DOCK_BASE' + '_' + version.replace('.','_')] + 'bin/Linux/dock.csh'
+command = os.environ['DOCK_BASE' + '_' + version.replace('.','_')] + '/bin/Linux/dock.csh'
 
 print(command)
 
