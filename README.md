@@ -33,11 +33,15 @@ You should now be able to run
 
 conda activate drugpred_RNA
 
-#### Unzip the database containg drug molecules for docking  and prepare environment for docking ########################################################
+#### Unzip the database containg drug molecules for docking  and prepare environment  ########################################################
 
 1) unzip the file mols.zip and move the file drug_moles.db to the scripts folder
 
 2) create the environment variable DOCK_BASE_3_6 and point it to the folder containing DOCK 3.6 (e. g. setenv DOCK_BASE_3_6 /path_to_dock_folder/dockenv)
+
+3) create the environment variable DOCK_BASE and point it to the same folder as $DOCK_BASE_3_6
+
+4)  create the environment variable DrugPred and point it to the foler containing the DrugPred scripts
 
 
 #### Downloading and preparing files for DrugPred_RNA ###########################################################
